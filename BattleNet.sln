@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BattleNet", "BattleNet\BattleNet.vcxproj", "{8F320E5E-5E10-41CA-9A87-17CCFE06F9CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F320E5E-5E10-41CA-9A87-17CCFE06F9CA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8F320E5E-5E10-41CA-9A87-17CCFE06F9CA}.Debug|Win32.Build.0 = Debug|Win32
+		{8F320E5E-5E10-41CA-9A87-17CCFE06F9CA}.Release|Win32.ActiveCfg = Release|Win32
+		{8F320E5E-5E10-41CA-9A87-17CCFE06F9CA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
