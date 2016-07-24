@@ -4,21 +4,15 @@
 #include <WinSock2.h>
 #include <string>
 #include <iostream>
+#include <vector>
+#include "ChessClient.h"
 
 enum Packet
 {
 	P_ChatMessage,
 	P_GameStateChange,
 	P_ChessMove,
-	P_Test
-};
-
-enum GameState
-{
-	G_GlobalServer,
-	G_Waiting_For_chess,
-	G_In_Chess,
-	G_None
+	P_Disconnect
 };
 
 class Server
@@ -40,16 +34,15 @@ private:
 	bool ProcessPacket(int ID, Packet _packettype);
 	bool ProcessPacket(int IDS, int IDR, Packet _packettype);
 
+	int FindClient(int ID);
+
 	static void ClientHandlerThread(int ID);
 	static void StartChessGames();
 	static void ChessHandlerThread(int IDP1, int IDP2);
 
 private:
-	SOCKET Connections[100];
-	GameState PlayersStates[100];
-	bool KillThread[100];
-	HANDLE ClientThreads[100];
-	HANDLE ChessThreads[50];
+	std::vector<ChessClient> players;
+	std::vector<HANDLE> threads;
 	int TotalConnections;
 
 	

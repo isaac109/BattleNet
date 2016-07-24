@@ -79,11 +79,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChessClient.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ChessClient.cpp" />
     <ClCompile Include="ChessServer.cpp" />
     <ClCompile Include="SendGetMethods.cpp" />
     <ClCompile Include="Server.cpp" />

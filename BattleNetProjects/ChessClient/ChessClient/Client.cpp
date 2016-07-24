@@ -22,7 +22,6 @@ bool Client::ProcessPacket(Packet _packettype)
 			std::cout << Message << std::endl; //Display the message to the user
 			if(Message.find("InitChess") != std::string::npos)
 			{
-				opponentID = Message.substr(Message.find(":")+1);
 				if(Message.find("P1") != std::string::npos)
 				{
 					clientptr->gState = GameState::G_InChessP1;
@@ -131,7 +130,6 @@ void Client::PlayChess(PlayerType::Player player)
 		std::string msg = GUI::update();
 		if(msg.find("MOVE:") != std::string::npos)
 		{
-			msg+="OpponentID:" + clientptr->opponentID;
 			if (!clientptr->SendString(msg)) //Send string: userinput, If string fails to send... (Connection issue)
 			break;
 		}

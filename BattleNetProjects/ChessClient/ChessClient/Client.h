@@ -53,7 +53,6 @@ private:
 	SOCKET Connection;//This client's connection to the server
 	SOCKADDR_IN addr; //Address to be binded to our Connection socket
 	int sizeofaddr; //Need sizeofaddr for the connect function
-	std::string opponentID;
 
 
 	
