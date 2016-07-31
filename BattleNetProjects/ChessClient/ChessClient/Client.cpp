@@ -125,7 +125,7 @@ bool Client::CloseConnection()
 void Client::PlayChess(PlayerType::Player player)
 {
 	GUI::initialize(clientptr->_argc, clientptr->_argv, player);
-	while(true)
+	while(clientptr->gState != GameState::G_PublicChat)
 	{
 		std::string msg = GUI::update();
 		if(msg.find("MOVE:") != std::string::npos)
@@ -134,4 +134,5 @@ void Client::PlayChess(PlayerType::Player player)
 			break;
 		}
 	}
+
 }

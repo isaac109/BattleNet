@@ -37,8 +37,25 @@ bool Client::SendString(std::string & _string)
 {
 	if(_string == "Play Chess")
 	{
+		if(gState != GameState::G_PublicChat)
+		{
+			std::cout<<"Already in a game, canceling request"<<std::endl;
+			return false;
+		}
 		_string = "RequestChess";
 		std::cout<<"Waiting for player"<<std::endl;
+		if (!SendPacketType(P_GameStateChange)) //Send packet type: Chat Message, If sending packet type fails...
+		return false; //Return false: Failed to send string
+	}
+	else if(_string == "Return to lobby")
+	{
+		if(gState == GameState::G_PublicChat)
+		{
+			std::cout<<"Already in the lobby, canceling request"<<std::endl;
+			return false;
+		}
+		gState = GameState::G_PublicChat;
+		std::cout<<"Leaving chess and returning to lobby"<<std::endl;
 		if (!SendPacketType(P_GameStateChange)) //Send packet type: Chat Message, If sending packet type fails...
 		return false; //Return false: Failed to send string
 	}

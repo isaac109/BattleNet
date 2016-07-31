@@ -16,6 +16,7 @@ namespace GUI
 	void moveOpponent(std::string move);
 	void render();
 	void renderPieces(int i, int j);
+	void renderPromoteOptions();
 	void changeViewport(int x, int h);
 	struct GUIData
 	{
@@ -36,10 +37,14 @@ namespace GUI
 		void highlighPawn(int w, int h);
 		void highlighQueen(int w, int h);
 		void highlighRook(int w, int h);
+		void promotePawn(PieceType::Piece piece);
+		void findKings();
+		void endGame(PlayerType::Player player);
 		void displayText();
 		Board _board;
 		int windowWidth;
 		int windowHeight;
+		bool _promotePawn;
 		bool _boardInit;
 		PlayerType::Player _player;
 		PlayerType::Player _opponent;

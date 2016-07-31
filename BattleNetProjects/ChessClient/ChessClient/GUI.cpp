@@ -237,11 +237,14 @@ string GUI::update()
 {
 	glutMainLoopEvent();
 	string msg = data._movemsg;
-	if(msg != "")
+	if(msg.find("|P") != std::string::npos && msg.find("|P->") == std::string::npos)
 	{
-		cout<<"here"<<endl;
+		msg = "";
 	}
-	data._movemsg = "";
+	else
+	{
+		data._movemsg = "";
+	}
 	return msg;
 }
 
@@ -558,49 +561,163 @@ void GUI::GUIData::highlightOptions(int w, int h, bool clear)
 	}
 }
 
+void GUI::GUIData::findKings()
+{
+	bool whiteKing = false;
+	bool blackKing = false;
+	for each (Tile tile in _board.board)
+	{
+		if(tile._piece == PieceType::KING)
+		{
+			if(tile._player == PlayerType::P_ONE)
+			{
+				whiteKing = true;
+			}
+			else
+			{
+				blackKing = true;
+			}
+		}
+	}
+	if(!blackKing && whiteKing)
+	{
+		endGame(PlayerType::P_ONE);
+	}
+	if(blackKing && !whiteKing)
+	{
+		endGame(PlayerType::P_TWO);
+	}
+}
+
+void GUI::GUIData::endGame(PlayerType::Player player)
+{
+	_isTurn = false;
+	if(player == _player)
+	{
+		cout<<"CONGRADULATIONS! YOU WIN!"<<endl;
+	}
+	else
+	{
+		cout<<"Sorry, you lost"<<endl;
+	}
+	cout<< "The game is over and the winner has been declared. \nYou may return to the lobby by entering (Return to lobby)."<<endl;
+}
+
+void GUI::GUIData::promotePawn(PieceType::Piece piece)
+{
+	
+	for (int i = 0; i < 8; i++)
+	{
+		if(_board.board[0][i]._player == _player && _board.board[0][i]._piece == PieceType::PAWN)
+		{
+			_board.board[0][i]._piece = piece;
+			break;
+		}
+	}
+	_isTurn = false;
+	_promotePawn = false;
+	_movemsg+="->";
+	switch (piece)
+	{
+	case PieceType::QUEEN:
+		_movemsg+="Q";
+		break;
+	case PieceType::BISHOP:
+		_movemsg+="B";
+		break;
+	case PieceType::KNIGHT:
+		_movemsg+="K";
+		break;
+	case PieceType::ROOK:
+		_movemsg+="R";
+		break;
+	default:
+		break;
+	}
+	
+}
+
 void GUI::mouseClick(int button, int state, int x, int y)
 {
 	if(data._isTurn && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		Tile *tile = data._board.findTile(x,y);
-		if(tile->_isHighlighted)
+		if(data._promotePawn)
 		{
-			string move = "MOVE:";
-			move += to_string(data.selectedTile->_x) + ",";
-			move += to_string(data.selectedTile->_y) + ",";
-			move += to_string(tile->_x) + ",";
-			move += to_string(tile->_y) + "|";
-			data._movemsg = move;
-			data._isTurn = false;
-			data.selectedTile->_isSelected = false;
-			data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, true);
-			tile->_player = data.selectedTile->_player;
-			tile->_piece = data.selectedTile->_piece;
-			data.selectedTile->_player = PlayerType::NONE;
-			data.selectedTile->_piece = PieceType::NONE;
-			data.selectedTile = NULL;
+			int size = data.getSize(data.windowWidth,data.windowHeight);
+			int w = data.getStartWidth(data.windowWidth,size);
+			int h = data.getStartHeight(data.windowHeight,size);
+
+			size *= 2;
+
+			if(y >= h && y <= h+size)
+			{
+				if(x >= w && x <= w+size)
+				{
+					data.promotePawn(PieceType::BISHOP);
+				}
+				if(x >= w+size && x <= w+size*2)
+				{
+					data.promotePawn(PieceType::KNIGHT);
+				}
+				if(x >= w+size*2 && x <= w+size*3)
+				{
+					data.promotePawn(PieceType::QUEEN);
+				}
+				if(x >= w+size*3 && x <= w+size*4)
+				{
+					data.promotePawn(PieceType::ROOK);
+				}
+			}
 		}
-		else if(tile->_player == data._player)
+		else
 		{
-			if(data.selectedTile != NULL && data.selectedTile->_posH == tile->_posH && data.selectedTile->_posW == tile->_posW)
+			Tile *tile = data._board.findTile(x,y);
+			if(tile->_isHighlighted)
 			{
+				string move = "MOVE:";
+				move += to_string(data.selectedTile->_x) + ",";
+				move += to_string(data.selectedTile->_y) + ",";
+				move += to_string(tile->_x) + ",";
+				move += to_string(tile->_y) + "|";
+				data._movemsg = move;
+				data._isTurn = false;
 				data.selectedTile->_isSelected = false;
 				data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, true);
+				tile->_player = data.selectedTile->_player;
+				tile->_piece = data.selectedTile->_piece;
+				data.selectedTile->_player = PlayerType::NONE;
+				data.selectedTile->_piece = PieceType::NONE;
 				data.selectedTile = NULL;
+				if(tile->_piece == PieceType::PAWN && tile->_y == 0)
+				{
+					data._isTurn = true;
+					data._promotePawn = true;
+					data._movemsg+="|P";
+				}
+				data.findKings();
 			}
-			else if(data.selectedTile != NULL)
+			else if(tile->_player == data._player)
 			{
-				data.selectedTile->_isSelected = false;
-				data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, true);
-				data.selectedTile = tile;
-				data.selectedTile->_isSelected = true;
-				data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, false);
-			}
-			else
-			{
-				data.selectedTile = tile;
-				data.selectedTile->_isSelected = true;
-				data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, false);
+				if(data.selectedTile != NULL && data.selectedTile->_posH == tile->_posH && data.selectedTile->_posW == tile->_posW)
+				{
+					data.selectedTile->_isSelected = false;
+					data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, true);
+					data.selectedTile = NULL;
+				}
+				else if(data.selectedTile != NULL)
+				{
+					data.selectedTile->_isSelected = false;
+					data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, true);
+					data.selectedTile = tile;
+					data.selectedTile->_isSelected = true;
+					data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, false);
+				}
+				else
+				{
+					data.selectedTile = tile;
+					data.selectedTile->_isSelected = true;
+					data.highlightOptions(data.selectedTile->_x, data.selectedTile->_y, false);
+				}
 			}
 		}
 	}
@@ -623,6 +740,26 @@ void GUI::moveOpponent(string move)
 	data._board.board[endy][endx]._piece = data._board.board[starty][startx]._piece;
 	data._board.board[starty][startx]._player = PlayerType::NONE;
 	data._board.board[starty][startx]._player = PlayerType::NONE;
+	if(move.find("|P->") != string::npos)
+	{
+		if(move.find("Q") != string::npos)
+		{
+			data._board.board[endy][endx]._piece = PieceType::QUEEN;
+		}
+		else if(move.find("B") != string::npos)
+		{
+			data._board.board[endy][endx]._piece = PieceType::BISHOP;
+		}
+		else if(move.find("K") != string::npos)
+		{
+			data._board.board[endy][endx]._piece = PieceType::KNIGHT;
+		}
+		else
+		{
+			data._board.board[endy][endx]._piece = PieceType::ROOK;
+		}
+	}
+	data.findKings();
 	glutPostRedisplay();
 }
 
@@ -704,6 +841,67 @@ void GUI::renderPieces(int i, int j)
 
 }
 
+void GUI::renderPromoteOptions()
+{
+	int size = data.getSize(data.windowWidth,data.windowHeight);
+	int w = data.getStartWidth(data.windowWidth,size);
+	int h = data.getStartHeight(data.windowHeight,size);
+
+	size *= 2;
+	switch (data._player)
+	{
+	case PlayerType::P_TWO:
+		for(int i = 0; i < 4; i++)
+		{
+			glEnable(GL_TEXTURE_2D);
+			if(i==0)
+				glBindTexture(GL_TEXTURE_2D, texture[0]);
+			if(i==1)
+				glBindTexture(GL_TEXTURE_2D, texture[2]);
+			if(i==2)
+				glBindTexture(GL_TEXTURE_2D, texture[4]);
+			if(i==3)
+				glBindTexture(GL_TEXTURE_2D, texture[5]);
+			
+			glBegin( GL_QUADS );
+			glTexCoord2d(0,1); glVertex2d(w,h);
+			glTexCoord2d(0, 0); glVertex2d(w,h+size);
+			glTexCoord2d(1,0); glVertex2d(w+size,h+size);
+			glTexCoord2d(1,1); glVertex2d(w+size,h);
+			glEnd();
+			glDisable(GL_TEXTURE_2D);
+			w+=size;
+		}
+		break;
+	case PlayerType::P_ONE:
+		for(int i = 0; i < 4; i++)
+		{
+			glEnable(GL_TEXTURE_2D);
+			if(i == 0)
+				glBindTexture(GL_TEXTURE_2D, texture[6]);
+			if(i==1)
+				glBindTexture(GL_TEXTURE_2D, texture[8]);
+			if(i == 2)
+				glBindTexture(GL_TEXTURE_2D, texture[10]);
+			if(i==3)
+				glBindTexture(GL_TEXTURE_2D, texture[11]);
+
+			glBegin( GL_QUADS );
+			glTexCoord2d(0,1); glVertex2d(w,h);
+			glTexCoord2d(0, 0); glVertex2d(w,h+size);
+			glTexCoord2d(1,0); glVertex2d(w+size,h+size);
+			glTexCoord2d(1,1); glVertex2d(w+size,h);
+			glEnd();
+			glDisable(GL_TEXTURE_2D);
+			w+=size;
+		}
+		break;
+	default:
+		break;
+	}
+
+}
+
 void GUI::render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -741,7 +939,12 @@ void GUI::render()
 			{
 				renderPieces(i, j);
 			}
+			
 		}
+	}
+	if(data._promotePawn)
+	{
+		renderPromoteOptions();
 	}
 	glutSwapBuffers();
 }

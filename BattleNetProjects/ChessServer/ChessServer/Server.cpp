@@ -57,7 +57,7 @@ bool Server::ListenForNewConnection()
 		ChessClient player = ChessClient(TotalConnections,newConnection);
 		players.push_back(player);
 		threads.push_back(CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)ClientHandlerThread, (LPVOID)(TotalConnections), NULL, NULL));
-		std::string MOTD = "MOTD: Welcome! This is the message of the day!.";
+		std::string MOTD = "Welcome to chess.\nThe commands are very simple.\nTo start looking for a match, enter(Play Chess).\nTo leave the match and re-enter the lobby type(Return to lobby).\nAnything else entered into the command prompt will be\n a message sent to the other players in the lobby.\n\nPlaying chess is simple. \nWhen it is your turn you will be able to click on a piece.\nThis will show you your available moves with that piece.\nReclicking that piece will de-select it.\nClicking any of the highlighted tiles will complete a move.\n\nHave Fun!";
 		SendString(TotalConnections, MOTD);
 		TotalConnections += 1; //Incremenent total # of clients that have connected
 		return true;
@@ -138,6 +138,22 @@ bool Server::ProcessPacket(int ID, Packet _packettype)
 			if(Message == "RequestChess")
 			{
 				client.gameState = GameState::G_Waiting_For_chess;
+				std::cout<< ID<<players[FindClient(ID)].gameState<<std::endl;
+			}
+			if(Message == "Return to lobby")
+			{
+				client.gameState = GameState::G_GlobalServer;
+				if(client.opponentID != -1)
+				{
+					Message = "Your opponent has left the game.";
+					_id = FindClient(client.opponentID);
+					players[_id].opponentID = -1;
+					if (!SendString(client.opponentID, Message)) //Send message to connection at index i, if message fails to be sent...
+					{
+						std::cout << "Failed to send message from client ID: " << ID << " to client ID: " << client.opponentID << std::endl;
+					}
+					client.opponentID = -1;
+				}
 				std::cout<< ID<<players[FindClient(ID)].gameState<<std::endl;
 			}
 			break;
